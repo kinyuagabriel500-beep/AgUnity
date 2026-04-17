@@ -1,0 +1,10 @@
+{
+  "expo": {
+    "name": "UFIP Mobile",
+    "slug": "ufip-mobile",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "platforms": ["android", "ios", "web"],
+    "jsEngine": "hermes"
+  }
+}

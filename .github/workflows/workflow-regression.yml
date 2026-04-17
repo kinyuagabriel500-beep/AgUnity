@@ -1,0 +1,55 @@
+name: Workflow Regression
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "server/**"
+      - "client/**"
+      - "scripts/workflow-*.ps1"
+      - "docker-compose.yml"
+  push:
+    branches: [ main, master ]
+    paths:
+      - "server/**"
+      - "client/**"
+      - "scripts/workflow-*.ps1"
+      - "docker-compose.yml"
+
+jobs:
+  workflow-regression:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Start stack
+        run: docker compose -f docker-compose.yml up -d --build postgres ai-service server client
+
+      - name: Wait for API health
+        shell: pwsh
+        run: |
+          $ready = $false
+          for ($i = 0; $i -lt 60; $i++) {
+            try {
+              $h = Invoke-RestMethod -Method Get -Uri 'http://localhost:4000/health'
+              if ($h.status -eq 'ok') { $ready = $true; break }
+            } catch {}
+            Start-Sleep -Seconds 1
+          }
+          if (-not $ready) { throw 'API health check failed' }
+
+      - name: Run regression sequence
+        shell: pwsh
+        run: ./scripts/workflow-regression.ps1
+
+      - name: Dump logs on failure
+        if: failure()
+        run: |
+          docker compose -f docker-compose.yml logs --no-color server
+          docker compose -f docker-compose.yml logs --no-color client
+          docker compose -f docker-compose.yml logs --no-color postgres
+
+      - name: Stop stack
+        if: always()
+        run: docker compose -f docker-compose.yml down -v

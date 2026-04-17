@@ -1,0 +1,106 @@
+POST http://localhost:4000/api/auth/register
+BODY {
+    "email":  "farmer1776434136@ufip.test",
+    "fullName":  "Flow Farmer",
+    "password":  "Password123!",
+    "phone":  "0701001001"
+}
+OK http://localhost:4000/api/auth/register
+POST http://localhost:4000/api/auth/register
+BODY {
+    "email":  "transporter1776434136@ufip.test",
+    "fullName":  "Flow Transporter",
+    "password":  "Password123!",
+    "phone":  "0701001002"
+}
+OK http://localhost:4000/api/auth/register
+POST http://localhost:4000/api/auth/register
+BODY {
+    "email":  "warehouse1776434136@ufip.test",
+    "fullName":  "Flow Warehouse",
+    "password":  "Password123!",
+    "phone":  "0701001003"
+}
+OK http://localhost:4000/api/auth/register
+POST http://localhost:4000/api/auth/register
+BODY {
+    "email":  "retailer1776434136@ufip.test",
+    "fullName":  "Flow Retailer",
+    "password":  "Password123!",
+    "phone":  "0701001004"
+}
+OK http://localhost:4000/api/auth/register
+POST http://localhost:4000/api/auth/register
+BODY {
+    "email":  "consumer1776434136@ufip.test",
+    "fullName":  "Flow Consumer",
+    "password":  "Password123!",
+    "phone":  "0701001005"
+}
+OK http://localhost:4000/api/auth/register
+ROLES UPDATED
+POST http://localhost:4000/api/auth/login
+BODY {
+    "password":  "Password123!",
+    "email":  "farmer1776434136@ufip.test"
+}
+OK http://localhost:4000/api/auth/login
+POST http://localhost:4000/api/auth/login
+BODY {
+    "password":  "Password123!",
+    "email":  "transporter1776434136@ufip.test"
+}
+OK http://localhost:4000/api/auth/login
+POST http://localhost:4000/api/auth/login
+BODY {
+    "password":  "Password123!",
+    "email":  "warehouse1776434136@ufip.test"
+}
+OK http://localhost:4000/api/auth/login
+POST http://localhost:4000/api/auth/login
+BODY {
+    "password":  "Password123!",
+    "email":  "retailer1776434136@ufip.test"
+}
+OK http://localhost:4000/api/auth/login
+POST http://localhost:4000/api/auth/login
+BODY {
+    "password":  "Password123!",
+    "email":  "consumer1776434136@ufip.test"
+}
+OK http://localhost:4000/api/auth/login
+POST http://localhost:4000/api/farms
+BODY {
+    "county":  "Nyeri",
+    "name":  "Workflow Demo Farm",
+    "location":  "Nyeri",
+    "acreageHectares":  4
+}
+OK http://localhost:4000/api/farms
+POST http://localhost:4000/api/harvests
+BODY {
+    "quantityKg":  1200,
+    "harvestDate":  "2026-04-17",
+    "farmId":  "bb75dac9-f3bf-41d1-82cf-e60e2cdba594",
+    "crop":  "maize",
+    "unitPriceKes":  55
+}
+OK http://localhost:4000/api/harvests
+POST http://localhost:4000/api/traceability/batches
+BODY {
+    "quantityKg":  1200,
+    "harvestId":  "f8123126-62fb-4d53-ac0e-580d2bd31f5a",
+    "metadata":  {
+                     "lot":  "A1",
+                     "grade":  "Premium"
+                 },
+    "consumerNote":  "Workflow demo batch",
+    "producedAt":  "2026-04-17",
+    "warehouseName":  "Flow Storage Hub",
+    "crop":  "maize",
+    "retailerName":  "Flow Retail Market",
+    "transporterName":  "Flow Logistics",
+    "farmId":  "bb75dac9-f3bf-41d1-82cf-e60e2cdba594"
+}
+FAILED_URL=http://localhost:4000/api/traceability/batches
+FAILED_ERROR={"message":"Cannot read properties of undefined (reading '_zod')"}
