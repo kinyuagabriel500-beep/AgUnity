@@ -1,7 +1,19 @@
+const defaultApiBaseUrl = "https://agunity.onrender.com/api";
+
 const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL || "http://localhost:4000/api";
+  import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL || defaultApiBaseUrl;
 const TOKEN_KEY = "agunity-token";
 const USER_KEY = "agunity-user";
+
+const parseErrorMessage = async (response) => {
+  try {
+    const payload = await response.json();
+    if (payload?.message) return payload.message;
+  } catch (_error) {
+    // Ignore JSON parsing failures and use fallback text.
+  }
+  return `Request failed (${response.status})`;
+};
 
 export const authStore = {
   getToken: () => localStorage.getItem(TOKEN_KEY),
@@ -28,7 +40,7 @@ export const getJson = async (path) => {
   const response = await fetch(`${API_BASE_URL}${path}`, {
     headers: withAuth()
   });
-  if (!response.ok) throw new Error("Request failed");
+  if (!response.ok) throw new Error(await parseErrorMessage(response));
   return response.json();
 };
 
@@ -38,7 +50,7 @@ export const postJson = async (path, body) => {
     headers: withAuth({ "Content-Type": "application/json" }),
     body: JSON.stringify(body)
   });
-  if (!response.ok) throw new Error("Request failed");
+  if (!response.ok) throw new Error(await parseErrorMessage(response));
   return response.json();
 };
 
@@ -48,7 +60,7 @@ export const postFormData = async (path, formData) => {
     headers: withAuth(),
     body: formData
   });
-  if (!response.ok) throw new Error("Request failed");
+  if (!response.ok) throw new Error(await parseErrorMessage(response));
   return response.json();
 };
 
@@ -58,7 +70,7 @@ export const patchJson = async (path, body) => {
     headers: withAuth({ "Content-Type": "application/json" }),
     body: JSON.stringify(body)
   });
-  if (!response.ok) throw new Error("Request failed");
+  if (!response.ok) throw new Error(await parseErrorMessage(response));
   return response.json();
 };
 
