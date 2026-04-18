@@ -6,6 +6,7 @@ const routes = require("./routes");
 const { errorHandler } = require("./middleware/error-handler");
 
 const app = express();
+const frontendAppUrl = process.env.FRONTEND_APP_URL?.trim();
 
 app.use(helmet());
 app.use(cors());
@@ -20,6 +21,10 @@ app.use(morgan("combined"));
 const healthPayload = { status: "ok", service: "agunity-server" };
 
 app.get("/", (_req, res) => {
+  if (frontendAppUrl) {
+    return res.redirect(frontendAppUrl);
+  }
+
   res.json(healthPayload);
 });
 

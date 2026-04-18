@@ -8,12 +8,14 @@ import WarehouseDashboard from "./pages/WarehouseDashboard";
 import RetailerDashboard from "./pages/RetailerDashboard";
 import ConsumerDashboard from "./pages/ConsumerDashboard";
 import AuthPanel from "./components/AuthPanel";
+import LandingPage from "./components/LandingPage";
 import ClimateAdvisoryPanel from "./components/ClimateAdvisoryPanel";
 import { useAuth } from "./hooks/useAuth";
 
 export default function App() {
   const { user, loading, isAuthenticated, signIn, signUp, signOut } = useAuth();
   const [authError, setAuthError] = useState("");
+  const [showAuth, setShowAuth] = useState(false);
   const role = String(user?.role || "farmer").trim().toLowerCase();
   const isAdmin = role === "admin";
 
@@ -44,27 +46,44 @@ export default function App() {
 
   if (!isAuthenticated) {
     return (
-      <main className="content">
-        <AuthPanel
-          loading={loading}
-          onLogin={async (email, password, roleHint) => {
-            try {
-              setAuthError("");
-              await signIn(email, password, roleHint);
-            } catch (_error) {
-              setAuthError("Invalid login. Check credentials.");
-            }
-          }}
-          onRegister={async (payload) => {
-            try {
-              setAuthError("");
-              await signUp(payload);
-            } catch (_error) {
-              setAuthError("Registration failed. Try another email.");
-            }
-          }}
+      <main className="public-page">
+        <LandingPage
+          onGetStarted={() => setShowAuth(true)}
+          onSignIn={() => setShowAuth(true)}
         />
-        {authError ? <p className="error">{authError}</p> : null}
+
+        <section className={`auth-section ${showAuth ? "visible" : ""}`} id="auth-panel">
+          <div className="auth-section-copy">
+            <span className="eyebrow">Access the platform</span>
+            <h2>Sign in to your AGUNITY workspace</h2>
+            <p>
+              Use your account to access the dashboard for your role, track activity, and start
+              working with live platform data.
+            </p>
+          </div>
+
+          <AuthPanel
+            loading={loading}
+            onLogin={async (email, password, roleHint) => {
+              try {
+                setAuthError("");
+                await signIn(email, password, roleHint);
+              } catch (error) {
+                setAuthError(error.message || "Invalid login. Check credentials.");
+              }
+            }}
+            onRegister={async (payload) => {
+              try {
+                setAuthError("");
+                await signUp(payload);
+              } catch (error) {
+                setAuthError(error.message || "Registration failed. Try another email.");
+              }
+            }}
+          />
+
+          {authError ? <p className="error">{authError}</p> : null}
+        </section>
       </main>
     );
   }

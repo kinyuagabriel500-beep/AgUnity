@@ -62,6 +62,7 @@ export default function AuthPanel({ onLogin, onRegister, loading }) {
           placeholder="Password"
           value={form.password}
           onChange={(e) => setForm((p) => ({ ...p, password: e.target.value }))}
+          minLength={8}
           required
         />
         <button type="submit" disabled={loading}>
