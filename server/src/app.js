@@ -17,8 +17,18 @@ app.use(express.json({
 }));
 app.use(morgan("combined"));
 
+const healthPayload = { status: "ok", service: "ufip-server" };
+
+app.get("/", (_req, res) => {
+  res.json(healthPayload);
+});
+
 app.get("/health", (_req, res) => {
-  res.json({ status: "ok", service: "ufip-server" });
+  res.json(healthPayload);
+});
+
+app.get("/api/health", (_req, res) => {
+  res.json(healthPayload);
 });
 
 app.use("/api", routes);

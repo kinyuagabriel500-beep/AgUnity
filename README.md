@@ -23,9 +23,11 @@ Follow the phased build plan:
 4. AI advisory services
 5. Additional platform modules
 
-## Railway Deployment
+## Render + Vercel Deployment
 
-See [RAILWAY_DEPLOYMENT.md](RAILWAY_DEPLOYMENT.md) for production deployment steps on Railway (server + ai-service + client + PostgreSQL), required environment variables, domain wiring, and smoke tests.
+See [RENDER_DEPLOYMENT.md](RENDER_DEPLOYMENT.md) for the free deployment path using Render for `server` and `ai-service`, Vercel for `client`, and Supabase for PostgreSQL.
+
+If you want the older Railway-specific path, see [RAILWAY_DEPLOYMENT.md](RAILWAY_DEPLOYMENT.md).
 
 ## Real Payments Upgrade (M-Pesa + Stripe)
 

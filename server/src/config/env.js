@@ -11,13 +11,16 @@ module.exports = {
   databaseUrl:
     process.env.DATABASE_URL ||
     "postgresql://postgres:postgres@localhost:5432/ufip",
+  databaseSsl: ["1", "true", "yes"].includes(String(process.env.DATABASE_SSL || "").toLowerCase()),
   polygonRpcUrl: process.env.POLYGON_RPC_URL || "https://polygon-rpc.com",
   polygonPrivateKey: process.env.POLYGON_PRIVATE_KEY || "",
   ipfsApiUrl: process.env.IPFS_API_URL || "",
   ipfsApiToken: process.env.IPFS_API_TOKEN || "",
   ipfsGatewayUrl: process.env.IPFS_GATEWAY_URL || "https://ipfs.io/ipfs/",
-  aiServiceBaseUrl: process.env.AI_SERVICE_BASE_URL || "http://localhost:8000",
-  publicApiBaseUrl: process.env.PUBLIC_API_BASE_URL || "http://localhost:4000",
+  aiServiceBaseUrl:
+    process.env.AI_SERVICE_BASE_URL || process.env.AI_SERVICE_URL || "http://localhost:8000",
+  publicApiBaseUrl:
+    process.env.PUBLIC_API_BASE_URL || process.env.PUBLIC_API_URL || "http://localhost:4000",
   geminiApiKey: process.env.GEMINI_API_KEY || "",
   geminiModel: process.env.GEMINI_MODEL || "gemini-1.5-flash",
   paymentDefaultCurrency: process.env.PAYMENT_DEFAULT_CURRENCY || "KES",

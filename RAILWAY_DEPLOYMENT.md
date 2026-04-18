@@ -28,8 +28,9 @@ Required:
 - `JWT_SECRET=<long-random-secret>`
 - `JWT_EXPIRES_IN=7d`
 - `DATABASE_URL=<Railway PostgreSQL connection URL>`
-- `AI_SERVICE_BASE_URL=https://<your-ai-service-domain>`
-- `PUBLIC_API_BASE_URL=https://<your-server-domain>`
+- `DATABASE_SSL=true` for Supabase or any managed Postgres that requires TLS
+- `AI_SERVICE_BASE_URL=https://<your-ai-service-domain>` or `AI_SERVICE_URL=https://<your-ai-service-domain>`
+- `PUBLIC_API_BASE_URL=https://<your-server-domain>` or `PUBLIC_API_URL=https://<your-server-domain>`
 
 Optional:
 
@@ -78,7 +79,7 @@ Notes:
 
 Required at build time:
 
-- `VITE_API_BASE_URL=https://<your-server-domain>/api`
+- `VITE_API_BASE_URL=https://<your-server-domain>/api` or `VITE_API_URL=https://<your-server-domain>/api`
 
 Notes:
 
@@ -88,10 +89,10 @@ Notes:
 ## 3. Domain Wiring
 
 1. Ensure `ai-service` is deployed and has a public Railway domain.
-2. Set `AI_SERVICE_BASE_URL` in `server` to that domain.
+2. Set `AI_SERVICE_BASE_URL` or `AI_SERVICE_URL` in `server` to that domain.
 3. Deploy `server` and confirm:
    - `GET https://<server-domain>/health` returns ok.
-4. Set `VITE_API_BASE_URL` in `client` to `https://<server-domain>/api`.
+4. Set `VITE_API_BASE_URL` or `VITE_API_URL` in `client` to `https://<server-domain>/api`.
 5. Deploy `client` and open the app domain.
 
 ## 4. Smoke Tests
@@ -106,9 +107,9 @@ Notes:
 ## 5. Common Issues
 
 - Client cannot call backend:
-  - Verify `VITE_API_BASE_URL` includes `/api`.
+  - Verify `VITE_API_BASE_URL` or `VITE_API_URL` includes `/api`.
   - Redeploy client after changing env.
 - Server cannot call AI service:
-  - Verify `AI_SERVICE_BASE_URL` is the public AI domain.
+  - Verify `AI_SERVICE_BASE_URL` or `AI_SERVICE_URL` is the public AI domain.
 - DB connection errors:
-  - Check `DATABASE_URL` is from Railway PostgreSQL plugin and includes SSL if required.
+  - Check `DATABASE_URL` is valid and `DATABASE_SSL=true` is set for Supabase.
