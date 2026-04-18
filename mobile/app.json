@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "UFIP Mobile",
-    "slug": "ufip-mobile",
+    "name": "AGUNITY Mobile",
+    "slug": "agunity-mobile",
     "version": "1.0.0",
     "orientation": "portrait",
     "platforms": ["android", "ios", "web"],

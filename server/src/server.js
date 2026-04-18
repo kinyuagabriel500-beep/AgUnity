@@ -158,7 +158,7 @@ const start = async () => {
     await seedEnterpriseTemplates();
     await seedBillingPlans();
     app.listen(env.port, env.host, () => {
-      console.log(`UFIP server running on http://${env.host}:${env.port}`);
+      console.log(`AGUNITY server running on http://${env.host}:${env.port}`);
     });
   } catch (error) {
     console.error("Failed to start server:", error);

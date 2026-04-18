@@ -141,7 +141,7 @@ const getLiveAlerts = async (req, res, next) => {
         title: "Complete farm setup",
         message: "Add your first farm details to unlock personalized alerts and profit tracking.",
         severity: "high",
-        source: "ufip",
+        source: "agunity",
         actionLabel: "Start onboarding",
         createdAt: new Date().toISOString()
       });
@@ -159,7 +159,7 @@ const getLiveAlerts = async (req, res, next) => {
         title: "Log your first field activity",
         message: "Record planting, spraying, or harvest to activate smarter recommendations.",
         severity: "high",
-        source: "ufip",
+        source: "agunity",
         actionLabel: "Log activity",
         createdAt: new Date().toISOString()
       });
@@ -171,7 +171,7 @@ const getLiveAlerts = async (req, res, next) => {
         title: "Harvest records missing",
         message: "Add harvest entries to unlock accurate profit analysis and market matching.",
         severity: "medium",
-        source: "ufip",
+        source: "agunity",
         actionLabel: "Add harvest",
         createdAt: new Date().toISOString()
       });
@@ -183,7 +183,7 @@ const getLiveAlerts = async (req, res, next) => {
         title: "No critical alerts",
         message: "Farm conditions look stable. Keep logging activities daily.",
         severity: "low",
-        source: "ufip",
+        source: "agunity",
         actionLabel: "Open activities",
         createdAt: new Date().toISOString()
       });

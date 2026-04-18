@@ -1,6 +1,6 @@
-# UFIP AI Service (FastAPI)
+# AGUNITY AI Service (FastAPI)
 
-AI advisory microservice for the Unified Farm Intelligence Platform.
+AI advisory microservice for the AGUNITY (AgOS) platform.
 
 ## Endpoints
 

@@ -4,7 +4,7 @@ services:
   postgres:
     image: postgres:16-alpine
     environment:
-      POSTGRES_DB: ufip
+      POSTGRES_DB: agunity
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
     ports:
@@ -21,7 +21,7 @@ services:
       SERVER_HOST: 0.0.0.0
       JWT_SECRET: change_me_to_a_long_random_secret
       JWT_EXPIRES_IN: 7d
-      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/ufip
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/agunity
       WEATHER_API_KEY: ${WEATHER_API_KEY:-}
       AI_SERVICE_BASE_URL: http://ai-service:8000
       POLYGON_RPC_URL: ${POLYGON_RPC_URL:-https://polygon-rpc.com}

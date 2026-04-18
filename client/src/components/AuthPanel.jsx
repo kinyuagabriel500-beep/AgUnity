@@ -22,7 +22,7 @@ export default function AuthPanel({ onLogin, onRegister, loading }) {
 
   return (
     <section className="auth-panel">
-      <h2>{mode === "login" ? "Sign in to UFIP" : "Create role-based account"}</h2>
+      <h2>{mode === "login" ? "Sign in to AGUNITY" : "Create role-based account"}</h2>
       <form onSubmit={submit} className="auth-form">
         {mode === "register" && (
           <>

@@ -17,7 +17,7 @@ app.use(express.json({
 }));
 app.use(morgan("combined"));
 
-const healthPayload = { status: "ok", service: "ufip-server" };
+const healthPayload = { status: "ok", service: "agunity-server" };
 
 app.get("/", (_req, res) => {
   res.json(healthPayload);

@@ -12,7 +12,7 @@ const getStripeClient = () => {
     stripeClient = new Stripe(env.stripeSecretKey, {
       apiVersion: "2024-06-20",
       appInfo: {
-        name: "UFIP",
+        name: "AGUNITY",
         version: "1.0.0"
       }
     });
@@ -44,8 +44,8 @@ const createCheckoutSession = async ({ transactionId, amountKes, idempotencyKey,
           price_data: {
             currency: "kes",
             product_data: {
-              name: "UFIP Payment",
-              description: purpose || "UFIP platform transaction",
+              name: "AGUNITY Payment",
+              description: purpose || "AGUNITY platform transaction",
             },
             unit_amount: Math.round(Number(amountKes) * 100),
           },

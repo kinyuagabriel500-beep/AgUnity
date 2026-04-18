@@ -31,7 +31,7 @@ def _run_alert_job() -> None:
 def start_scheduler() -> None:
     if scheduler.running:
         return
-    scheduler.add_job(_run_alert_job, CronTrigger.from_crontab(settings.alert_cron), id="ufip-alert-job")
+    scheduler.add_job(_run_alert_job, CronTrigger.from_crontab(settings.alert_cron), id="agunity-alert-job")
     scheduler.start()
 
 

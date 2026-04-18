@@ -1,4 +1,4 @@
-# UFIP on Railway
+# AGUNITY on Railway
 
 This project can be deployed to Railway as **3 services + 1 database**:
 
@@ -98,8 +98,8 @@ Notes:
 ## 4. Smoke Tests
 
 - Client: app loads and login works.
-- Server: `GET /health` -> `{"status":"ok","service":"ufip-server"}`
-- AI: `GET /health` -> `{"status":"ok","service":"ufip-ai-service"}`
+- Server: `GET /health` -> `{"status":"ok","service":"agunity-server"}`
+- AI: `GET /health` -> `{"status":"ok","service":"agunity-ai-service"}`
 - Role routing:
   - Non-admin users are redirected to their own dashboard when trying other routes.
   - Admin can access all dashboards.

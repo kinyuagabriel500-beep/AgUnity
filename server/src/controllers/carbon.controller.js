@@ -61,7 +61,7 @@ const generateCertificate = async (req, res, next) => {
     if (!farm) return res.status(404).json({ message: "Farm not found" });
 
     const summary = await summarizeCarbonForFarm(query.farmId);
-    const certificateCode = `UFIP-CC-${crypto.randomBytes(4).toString("hex").toUpperCase()}`;
+    const certificateCode = `AGUNITY-CC-${crypto.randomBytes(4).toString("hex").toUpperCase()}`;
 
     const certificate = await CarbonCertificate.create({
       userId: req.user.id,

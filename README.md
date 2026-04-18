@@ -1,6 +1,6 @@
-# Unified Farm Intelligence Platform (UFIP)
+# AGUNITY (AgOS - Agricultural Operating System)
 
-UFIP is a modular, production-focused agritech platform designed to unify farm operations, intelligence, finance, and traceability in one ecosystem.
+AGUNITY is the Agricultural Operating System (AgOS) for Africa – a modular, production-focused agritech platform designed to unify farm operations, intelligence, finance, and traceability in one ecosystem.
 
 ## Monorepo Structure
 
@@ -31,7 +31,7 @@ If you want the older Railway-specific path, see [RAILWAY_DEPLOYMENT.md](RAILWAY
 
 ## Real Payments Upgrade (M-Pesa + Stripe)
 
-UFIP now includes production-ready payment foundations:
+AGUNITY now includes production-ready payment foundations:
 
 1. Provider adapters for Stripe Checkout and M-Pesa STK Push.
 2. Idempotent checkout creation using `Idempotency-Key`.

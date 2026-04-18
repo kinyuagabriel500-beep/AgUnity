@@ -47,7 +47,7 @@ const applyForLoan = async (req, res, next) => {
       status,
       reviewerNote:
         status === "approved"
-          ? "Auto-approved by UFIP baseline credit policy."
+          ? "Auto-approved by AGUNITY baseline credit policy."
           : "Pending manual lending review due to current score threshold."
     });
 

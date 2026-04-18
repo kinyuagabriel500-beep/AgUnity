@@ -19,7 +19,7 @@ export default function App() {
   useEffect(() => {
     Notifications.requestPermissionsAsync();
     (async () => {
-      const saved = await AsyncStorage.getItem("ufip-mobile-token");
+      const saved = await AsyncStorage.getItem("agunity-mobile-token");
       if (saved) {
         setAuthToken(saved);
         setSession((p) => ({ ...p, token: saved }));
@@ -30,7 +30,7 @@ export default function App() {
     try {
       const auth = await login({ email: session.email, password: session.password });
       setAuthToken(auth.token);
-      await AsyncStorage.setItem("ufip-mobile-token", auth.token);
+      await AsyncStorage.setItem("agunity-mobile-token", auth.token);
       setSession((p) => ({ ...p, token: auth.token }));
       setOnline(true);
       Alert.alert("Signed In", "Token saved for API sync.");
@@ -43,7 +43,7 @@ export default function App() {
 
   const notify = async (message) => {
     await Notifications.scheduleNotificationAsync({
-      content: { title: "UFIP Update", body: message },
+      content: { title: "AGUNITY Update", body: message },
       trigger: null
     });
   };
@@ -72,7 +72,7 @@ export default function App() {
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.content}>
-        <View style={styles.header}><Text style={styles.title}>UFIP Mobile</Text><StatusPill online={online} /></View>
+        <View style={styles.header}><Text style={styles.title}>AGUNITY Mobile</Text><StatusPill online={online} /></View>
         <Text style={styles.subtitle}>Icon-first activity logging for low bandwidth.</Text>
 
         <View style={styles.card}>

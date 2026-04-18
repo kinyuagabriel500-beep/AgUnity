@@ -1,6 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const KEY = "ufip-offline-activities";
+const KEY = "agunity-offline-activities";
 
 export const addToQueue = async (item) => {
   const existing = JSON.parse((await AsyncStorage.getItem(KEY)) || "[]");

@@ -74,7 +74,7 @@ const initiateStkPush = async ({ amountKes, phoneNumber, accountReference, trans
     PhoneNumber: normalizedPhone,
     CallBackURL: callbackUrl,
     AccountReference: accountReference.slice(0, 12),
-    TransactionDesc: (transactionDesc || "UFIP Payment").slice(0, 13),
+    TransactionDesc: (transactionDesc || "AGUNITY Payment").slice(0, 13),
   };
 
   const response = await fetch(`${getMpesaBaseUrl()}/mpesa/stkpush/v1/processrequest`, {

@@ -72,7 +72,7 @@ export default function App() {
   return (
     <div className="app-shell">
       <header className="top-bar">
-        <h1>UFIP</h1>
+        <h1>AGUNITY</h1>
         <span className="welcome">Hi, {user?.fullName || "Farmer"}</span>
         <nav>
           {navItems.map((item) => (

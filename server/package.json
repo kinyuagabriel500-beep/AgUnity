@@ -1,14 +1,15 @@
 {
-  "name": "ufip-server",
+  "name": "agunity-server",
   "version": "1.0.0",
-  "description": "UFIP backend API service",
+  "description": "AGUNITY (AgOS) backend API service",
   "main": "src/server.js",
   "scripts": {
     "dev": "nodemon src/server.js",
     "start": "node src/server.js"
   },
   "keywords": [
-    "ufip",
+    "agunity",
+    "agos",
     "agritech",
     "express",
     "postgres"

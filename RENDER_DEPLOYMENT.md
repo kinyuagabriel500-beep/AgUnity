@@ -1,4 +1,4 @@
-# UFIP on Render + Vercel + Supabase
+# AGUNITY on Render + Vercel + Supabase
 
 This project can be deployed as three public services plus one managed database:
 

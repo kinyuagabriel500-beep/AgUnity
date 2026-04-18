@@ -10,7 +10,7 @@ module.exports = {
   jwtExpiresIn: process.env.JWT_EXPIRES_IN || "7d",
   databaseUrl:
     process.env.DATABASE_URL ||
-    "postgresql://postgres:postgres@localhost:5432/ufip",
+    "postgresql://postgres:postgres@localhost:5432/agunity",
   databaseSsl: ["1", "true", "yes"].includes(String(process.env.DATABASE_SSL || "").toLowerCase()),
   polygonRpcUrl: process.env.POLYGON_RPC_URL || "https://polygon-rpc.com",
   polygonPrivateKey: process.env.POLYGON_PRIVATE_KEY || "",

@@ -111,7 +111,7 @@ const createCheckout = async (req, res, next) => {
     const mpesa = await initiateStkPush({
       amountKes: payload.amountKes,
       phoneNumber: normalizedPhone,
-      accountReference: `UFIP-${transaction.id.slice(0, 8)}`,
+      accountReference: `AGUNITY-${transaction.id.slice(0, 8)}`,
       transactionDesc: payload.purpose,
     });
 
