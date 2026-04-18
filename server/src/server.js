@@ -7,9 +7,21 @@ const { DataTypes } = require("sequelize");
 const { seedEnterpriseTemplates } = require("./services/enterprise-template.seed");
 const { seedBillingPlans } = require("./services/billing.seed");
 
+const describeTableSafe = async (queryInterface, tableName) => {
+  try {
+    return await queryInterface.describeTable(tableName);
+  } catch (error) {
+    if (error?.message?.includes("No description found")) {
+      return null;
+    }
+    throw error;
+  }
+};
+
 const ensureRoleColumn = async () => {
   const queryInterface = sequelize.getQueryInterface();
-  const table = await queryInterface.describeTable("users");
+  const table = await describeTableSafe(queryInterface, "users");
+  if (!table) return;
   if (!table.role) {
     await queryInterface.addColumn("users", "role", {
       type: DataTypes.STRING,
@@ -21,7 +33,8 @@ const ensureRoleColumn = async () => {
 
 const ensureSupplyChainColumns = async () => {
   const queryInterface = sequelize.getQueryInterface();
-  const salesTable = await queryInterface.describeTable("sales");
+  const salesTable = await describeTableSafe(queryInterface, "sales");
+  if (!salesTable) return;
   if (!salesTable.batchCode) {
     await queryInterface.addColumn("sales", "batchCode", {
       type: DataTypes.STRING,
@@ -47,7 +60,8 @@ const ensureSupplyChainColumns = async () => {
     });
   }
 
-  const batchesTable = await queryInterface.describeTable("traceability_batches");
+  const batchesTable = await describeTableSafe(queryInterface, "traceability_batches");
+  if (!batchesTable) return;
   if (!batchesTable.supplyChainStage) {
     await queryInterface.addColumn("traceability_batches", "supplyChainStage", {
       type: DataTypes.ENUM("farm", "transporter", "warehouse", "retailer", "consumer", "settled"),
@@ -115,7 +129,8 @@ const ensureSupplyChainColumns = async () => {
 
 const ensureFarmGeoColumns = async () => {
   const queryInterface = sequelize.getQueryInterface();
-  const farmsTable = await queryInterface.describeTable("farms");
+  const farmsTable = await describeTableSafe(queryInterface, "farms");
+  if (!farmsTable) return;
   if (!farmsTable.country) {
     await queryInterface.addColumn("farms", "country", {
       type: DataTypes.STRING,
@@ -151,10 +166,10 @@ const ensureFarmGeoColumns = async () => {
 const start = async () => {
   try {
     await sequelize.authenticate();
+    await sequelize.sync();
     await ensureRoleColumn();
     await ensureSupplyChainColumns();
     await ensureFarmGeoColumns();
-    await sequelize.sync();
     await seedEnterpriseTemplates();
     await seedBillingPlans();
     app.listen(env.port, env.host, () => {
