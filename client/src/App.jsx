@@ -1,5 +1,5 @@
 import { NavLink, Navigate, Route, Routes } from "react-router-dom";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import FarmerDashboard from "./pages/FarmerDashboard";
 import BuyerDashboard from "./pages/BuyerDashboard";
 import AdminDashboard from "./pages/AdminDashboard";
@@ -18,8 +18,19 @@ export default function App() {
   const { user, loading, isAuthenticated, signIn, signUp, signOut } = useAuth();
   const [authError, setAuthError] = useState("");
   const [showAuth, setShowAuth] = useState(false);
+  const authPanelRef = useRef(null);
   const role = String(user?.role || "farmer").trim().toLowerCase();
   const isAdmin = role === "admin";
+
+  const roleGuides = [
+    { role: "Farmer", detail: "Records farm activity, gets advisory, manages harvest and insurance." },
+    { role: "Buyer", detail: "Finds produce, verifies traceability, and places marketplace orders." },
+    { role: "Transporter", detail: "Accepts delivery jobs and updates shipment milestones." },
+    { role: "Warehouse", detail: "Receives stock, tracks storage conditions, and dispatches inventory." },
+    { role: "Retailer", detail: "Monitors supply availability and retail-ready batches." },
+    { role: "Consumer", detail: "Views product journey and trust signals from farm to shelf." },
+    { role: "Admin", detail: "Oversees users, system flows, and platform operations." }
+  ];
 
   const defaultRouteByRole = {
     farmer: "/",
@@ -48,15 +59,30 @@ export default function App() {
     return normalized.includes(role) || isAdmin ? element : <Navigate to={roleHome} replace />;
   };
 
+  const openAuthSection = () => {
+    setShowAuth(true);
+    setTimeout(() => {
+      const panel = authPanelRef.current || document.getElementById("auth-panel");
+      if (!panel) return;
+      panel.scrollIntoView({ behavior: "smooth", block: "start" });
+      if (typeof panel.focus === "function") panel.focus();
+    }, 0);
+  };
+
   if (!isAuthenticated) {
     return (
       <main className="public-page">
         <LandingPage
-          onGetStarted={() => setShowAuth(true)}
-          onSignIn={() => setShowAuth(true)}
+          onGetStarted={openAuthSection}
+          onSignIn={openAuthSection}
         />
 
-        <section className={`auth-section ${showAuth ? "visible" : ""}`} id="auth-panel">
+        <section
+          className={`auth-section ${showAuth ? "visible" : ""}`}
+          id="auth-panel"
+          ref={authPanelRef}
+          tabIndex={-1}
+        >
           <div className="auth-section-copy">
             <span className="eyebrow">Access the platform</span>
             <h2>Sign in to your AGUNITY workspace</h2>
@@ -64,6 +90,14 @@ export default function App() {
               Use your account to access the dashboard for your role, track activity, and start
               working with live platform data.
             </p>
+            <div className="role-explainer" aria-label="Platform roles and interactions">
+              {roleGuides.map((item) => (
+                <article key={item.role} className="role-explainer-card">
+                  <h3>{item.role}</h3>
+                  <p>{item.detail}</p>
+                </article>
+              ))}
+            </div>
           </div>
 
           <AuthPanel

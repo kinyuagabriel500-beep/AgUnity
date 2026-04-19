@@ -449,6 +449,35 @@ button { background: #1d5d37; color: #fff; border: 0; padding: 6px 10px; border-
 	line-height: 1.65;
 }
 
+.role-explainer {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 10px;
+	margin-top: 14px;
+}
+
+.role-explainer-card {
+	background: linear-gradient(180deg, #ffffff, #f6faf6);
+	border: 1px solid #dce8de;
+	border-radius: 12px;
+	padding: 10px 12px;
+	display: grid;
+	gap: 6px;
+}
+
+.role-explainer-card h3 {
+	margin: 0;
+	font-size: 0.95rem;
+	color: #163624;
+}
+
+.role-explainer-card p {
+	margin: 0;
+	font-size: 0.86rem;
+	line-height: 1.45;
+	color: #4b6154;
+}
+
 .feature-grid {
 	display: grid;
 	grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -521,6 +550,11 @@ button { background: #1d5d37; color: #fff; border: 0; padding: 6px 10px; border-
 	outline: 2px solid rgba(29, 93, 55, 0.15);
 }
 
+.auth-section:focus {
+	outline: 2px solid rgba(29, 93, 55, 0.35);
+	outline-offset: 2px;
+}
+
 .auth-section .auth-panel {
 	margin: 0;
 	width: 100%;
@@ -536,6 +570,10 @@ button { background: #1d5d37; color: #fff; border: 0; padding: 6px 10px; border-
 	}
 
 	.landing-highlights {
+		grid-template-columns: 1fr;
+	}
+
+	.role-explainer {
 		grid-template-columns: 1fr;
 	}
 }
