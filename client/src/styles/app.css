@@ -322,12 +322,22 @@ button { background: #1d5d37; color: #fff; border: 0; padding: 6px 10px; border-
 	min-height: 46px;
 	padding: 0 18px;
 	border-radius: 999px;
+	font-size: 14px;
+	font-weight: 600;
+	cursor: pointer;
+	transition: all 0.3s ease;
 }
 
 .secondary-action {
 	background: rgba(29, 93, 55, 0.08);
 	color: #1d5d37;
 	border: 1px solid rgba(29, 93, 55, 0.18);
+}
+
+.secondary-action:hover {
+	background: rgba(29, 93, 55, 0.15);
+	border-color: rgba(29, 93, 55, 0.3);
+	transform: translateY(-2px);
 }
 
 .landing-highlights {
