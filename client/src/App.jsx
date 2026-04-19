@@ -7,6 +7,7 @@ import TransporterDashboard from "./pages/TransporterDashboard";
 import WarehouseDashboard from "./pages/WarehouseDashboard";
 import RetailerDashboard from "./pages/RetailerDashboard";
 import ConsumerDashboard from "./pages/ConsumerDashboard";
+import MarketplacePage from "./pages/MarketplacePage";
 import AuthPanel from "./components/AuthPanel";
 import LandingPage from "./components/LandingPage";
 import ClimateAdvisoryPanel from "./components/ClimateAdvisoryPanel";
@@ -21,6 +22,7 @@ export default function App() {
 
   const defaultRouteByRole = {
     farmer: "/",
+    buyer: "/marketplace",
     transporter: "/transporter",
     warehouse: "/warehouse",
     retailer: "/retailer",
@@ -32,11 +34,12 @@ export default function App() {
 
   const navItems = [];
   if (role === "farmer" || isAdmin) navItems.push({ path: "/", label: "Farmer", end: true });
+  if (role === "farmer" || role === "buyer" || isAdmin) navItems.push({ path: "/marketplace", label: "Marketplace" });
   if (role === "transporter" || isAdmin) navItems.push({ path: "/transporter", label: "Transporter" });
   if (role === "warehouse" || isAdmin) navItems.push({ path: "/warehouse", label: "Warehouse" });
   if (role === "retailer" || isAdmin) navItems.push({ path: "/retailer", label: "Retailer" });
   if (role === "consumer" || isAdmin) navItems.push({ path: "/consumer", label: "Consumer" });
-  if (isAdmin) navItems.push({ path: "/buyer", label: "Buyer" });
+  if (role === "buyer" || isAdmin) navItems.push({ path: "/buyer", label: "Buyer Dashboard" });
   if (isAdmin) navItems.push({ path: "/admin", label: "Admin" });
 
   const guard = (allowedRoles, element) => {
@@ -112,11 +115,19 @@ export default function App() {
                 : <Navigate to={roleHome} replace />
             }
           />
+          <Route
+            path="/marketplace"
+            element={
+              role === "farmer" || role === "buyer" || isAdmin
+                ? <MarketplacePage role={role} />
+                : <Navigate to={roleHome} replace />
+            }
+          />
           <Route path="/transporter" element={guard(["transporter"], <TransporterDashboard />)} />
           <Route path="/warehouse" element={guard(["warehouse"], <WarehouseDashboard />)} />
           <Route path="/retailer" element={guard(["retailer"], <RetailerDashboard />)} />
           <Route path="/consumer" element={guard(["consumer"], <ConsumerDashboard />)} />
-          <Route path="/buyer" element={isAdmin ? <BuyerDashboard /> : <Navigate to={roleHome} replace />} />
+          <Route path="/buyer" element={(role === "buyer" || isAdmin) ? <BuyerDashboard /> : <Navigate to={roleHome} replace />} />
           <Route path="/admin" element={isAdmin ? <AdminDashboard /> : <Navigate to={roleHome} replace />} />
           <Route path="*" element={<Navigate to={roleHome} replace />} />
         </Routes>

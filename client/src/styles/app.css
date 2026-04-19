@@ -144,6 +144,21 @@ button { background: #1d5d37; color: #fff; border: 0; padding: 6px 10px; border-
 .payment-rail { background: #f6fbfd; border: 1px solid #cce2ec; border-radius: 10px; }
 .payment-rail h4 { margin: 0; color: #14465d; }
 .payment-rail small { color: #2c637c; }
+.marketplace-page { gap: 14px; }
+.marketplace-message { background: #edf4ef; border: 1px solid #d7e7db; border-radius: 10px; padding: 10px 12px; color: #1d5d37; }
+.marketplace-dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
+.marketplace-dashboard-card { background: #fff; border: 1px solid #dce8de; border-radius: 14px; padding: 14px; }
+.marketplace-dashboard-card h4 { margin: 0 0 10px; }
+.marketplace-dashboard-card p { margin: 0; color: #486353; }
+.marketplace-form { margin-top: 12px; }
+.marketplace-listings { display: grid; gap: 12px; margin-top: 12px; }
+.marketplace-card { background: linear-gradient(180deg, #ffffff, #f7faf7); border: 1px solid #dce8de; border-radius: 16px; padding: 16px; display: grid; gap: 10px; }
+.marketplace-card-header { display: flex; justify-content: space-between; gap: 12px; align-items: flex-start; }
+.marketplace-card-header h4 { margin: 6px 0 0; }
+.marketplace-card strong { color: #1d5d37; font-size: 1rem; }
+.marketplace-meta { margin: 0; font-size: 12px; color: #667b6c; }
+.marketplace-sell-panel { background: #f4f8f4; border: 1px dashed #cfe0d2; border-radius: 12px; padding: 12px; display: grid; gap: 8px; }
+.marketplace-sell-panel h5 { margin: 0; color: #1d5d37; }
 @media (max-width: 900px) {
 	.enterprise-grid { grid-template-columns: 1fr; }
 }

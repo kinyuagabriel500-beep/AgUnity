@@ -1,7 +1,7 @@
 import { useState } from "react";
 
 export default function AuthPanel({ onLogin, onRegister, loading }) {
-  const roles = ["farmer", "transporter", "warehouse", "retailer", "consumer", "admin"];
+  const roles = ["farmer", "buyer", "transporter", "warehouse", "retailer", "consumer", "admin"];
   const [mode, setMode] = useState("login");
   const [form, setForm] = useState({
     fullName: "",

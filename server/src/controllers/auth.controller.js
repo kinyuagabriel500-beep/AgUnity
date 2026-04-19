@@ -3,7 +3,7 @@ const { User } = require("../db/models");
 const { hashPassword, comparePassword } = require("../utils/hash");
 const { signAccessToken } = require("../services/token.service");
 
-const allowedRoles = ["farmer", "transporter", "warehouse", "retailer", "consumer", "admin"];
+const allowedRoles = ["farmer", "buyer", "transporter", "warehouse", "retailer", "consumer", "admin"];
 
 const registerSchema = z.object({
   fullName: z.string().min(2),
