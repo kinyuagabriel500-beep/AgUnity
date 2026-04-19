@@ -24,7 +24,31 @@ button, input, select, textarea { font: inherit; }
 	top: 0;
 	z-index: 10;
 }
-.top-bar nav { display: flex; gap: 12px; }
+
+.top-bar-brand {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	text-decoration: none;
+	color: #fff;
+	cursor: pointer;
+}
+
+.logo-icon {
+	height: 40px;
+	width: 40px;
+	object-fit: contain;
+	animation: logoFloat 3s ease-in-out infinite;
+}
+
+@keyframes logoFloat {
+	0%, 100% {
+		transform: translateY(0px);
+	}
+	50% {
+		transform: translateY(-4px);
+	}
+}
 .top-bar a { color: #d9f2e2; text-decoration: none; font-size: 14px; }
 .top-bar a.active { font-weight: 700; color: #fff; }
 .logout-btn {
@@ -172,6 +196,69 @@ button { background: #1d5d37; color: #fff; border: 0; padding: 6px 10px; border-
 .landing-shell {
 	display: grid;
 	gap: 24px;
+	position: relative;
+}
+
+.landing-logo-header {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	text-align: center;
+	padding: 40px 20px;
+	background: linear-gradient(135deg, rgba(29, 93, 55, 0.08), rgba(118, 168, 128, 0.08));
+	border-radius: 20px;
+	border: 2px solid rgba(29, 93, 55, 0.1);
+	animation: fadeInDown 0.8s ease-out;
+}
+
+.landing-logo {
+	height: 120px;
+	width: 120px;
+	object-fit: contain;
+	margin-bottom: 16px;
+	animation: logoGlow 3s ease-in-out infinite;
+	filter: drop-shadow(0 4px 12px rgba(29, 93, 55, 0.2));
+}
+
+@keyframes logoGlow {
+	0%, 100% {
+		transform: scale(1) rotateZ(0deg);
+		filter: drop-shadow(0 4px 12px rgba(29, 93, 55, 0.2));
+	}
+	50% {
+		transform: scale(1.05) rotateZ(2deg);
+		filter: drop-shadow(0 8px 20px rgba(29, 93, 55, 0.4));
+	}
+}
+
+@keyframes fadeInDown {
+	from {
+		opacity: 0;
+		transform: translateY(-30px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+.landing-logo-text {
+	font-size: 48px;
+	margin: 0 0 8px 0;
+	background: linear-gradient(135deg, #1d5d37, #2d7d4a);
+	-webkit-background-clip: text;
+	-webkit-text-fill-color: transparent;
+	background-clip: text;
+	font-weight: 700;
+	letter-spacing: -1px;
+}
+
+.landing-logo-subtitle {
+	font-size: 16px;
+	color: #1d5d37;
+	margin: 0;
+	font-weight: 500;
 }
 
 .landing-hero {

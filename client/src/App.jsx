@@ -12,6 +12,7 @@ import AuthPanel from "./components/AuthPanel";
 import LandingPage from "./components/LandingPage";
 import ClimateAdvisoryPanel from "./components/ClimateAdvisoryPanel";
 import { useAuth } from "./hooks/useAuth";
+import agunityLogo from "./assets/agunity-logo.svg";
 
 export default function App() {
   const { user, loading, isAuthenticated, signIn, signUp, signOut } = useAuth();
@@ -94,7 +95,10 @@ export default function App() {
   return (
     <div className="app-shell">
       <header className="top-bar">
-        <h1>AGUNITY</h1>
+        <div className="top-bar-brand">
+          <img src={agunityLogo} alt="AGUNITY" className="logo-icon" />
+          <h1>AGUNITY</h1>
+        </div>
         <span className="welcome">Hi, {user?.fullName || "Farmer"}</span>
         <nav>
           {navItems.map((item) => (

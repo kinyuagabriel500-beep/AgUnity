@@ -1,3 +1,5 @@
+import agunityLogo from "../assets/agunity-logo.svg";
+
 export default function LandingPage({ onGetStarted, onSignIn }) {
   const highlights = [
     { value: "24/7", label: "AI advisory coverage", icon: "🌍" },
@@ -36,6 +38,13 @@ export default function LandingPage({ onGetStarted, onSignIn }) {
 
   return (
     <section className="landing-shell">
+      {/* Logo Header */}
+      <div className="landing-logo-header">
+        <img src={agunityLogo} alt="AGUNITY" className="landing-logo" />
+        <h1 className="landing-logo-text">AGUNITY</h1>
+        <p className="landing-logo-subtitle">Agricultural Operating System for Africa</p>
+      </div>
+
       {/* Animated background elements */}
       <div className="landing-animated-bg">
         <div className="floating-shape shape-1"></div>

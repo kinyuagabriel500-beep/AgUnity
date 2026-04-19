@@ -1,0 +1,28 @@
+<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
+  <!-- Leaf -->
+  <g id="leaf">
+    <ellipse cx="100" cy="35" rx="12" ry="20" fill="#7FBF3F" transform="rotate(-25 100 35)"/>
+    <ellipse cx="115" cy="25" rx="10" ry="18" fill="#9FD356" transform="rotate(15 115 25)"/>
+    <ellipse cx="85" cy="25" rx="10" ry="18" fill="#9FD356" transform="rotate(-15 85 25)"/>
+  </g>
+  
+  <!-- Handshake -->
+  <g id="handshake">
+    <!-- Left hand (green) -->
+    <path d="M 70 75 Q 65 85 70 95 L 85 90 Q 80 80 75 75 Z" fill="#1D5D37" stroke="#1D5D37" stroke-width="1"/>
+    <circle cx="68" cy="85" r="4" fill="#1D5D37"/>
+    <circle cx="70" cy="92" r="4" fill="#1D5D37"/>
+    
+    <!-- Right hand (yellow) -->
+    <path d="M 130 75 Q 135 85 130 95 L 115 90 Q 120 80 125 75 Z" fill="#E3A949" stroke="#E3A949" stroke-width="1"/>
+    <circle cx="132" cy="85" r="4" fill="#E3A949"/>
+    <circle cx="130" cy="92" r="4" fill="#E3A949"/>
+    
+    <!-- Handshake center -->
+    <ellipse cx="100" cy="90" rx="18" ry="15" fill="#7FBF3F" opacity="0.9"/>
+    <path d="M 75 90 Q 100 105 125 90" stroke="#1D5D37" stroke-width="2" fill="none"/>
+  </g>
+  
+  <!-- Decorative circle -->
+  <circle cx="100" cy="100" r="45" fill="none" stroke="#7FBF3F" stroke-width="1.5" opacity="0.3"/>
+</svg>
