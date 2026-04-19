@@ -173,6 +173,48 @@ const LoanApplication = sequelize.define(
   { tableName: "loan_applications", timestamps: true }
 );
 
+const InsurancePolicy = sequelize.define(
+  "InsurancePolicy",
+  {
+    id: { type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4, primaryKey: true },
+    policyNumber: { type: DataTypes.STRING, allowNull: false, unique: true },
+    cropType: { type: DataTypes.STRING, allowNull: false },
+    coverAmountKes: { type: DataTypes.DECIMAL(14, 2), allowNull: false, validate: { min: 1000 } },
+    premiumKes: { type: DataTypes.DECIMAL(14, 2), allowNull: false, validate: { min: 100 } },
+    seasonLabel: { type: DataTypes.STRING, allowNull: true },
+    startDate: { type: DataTypes.DATEONLY, allowNull: false },
+    endDate: { type: DataTypes.DATEONLY, allowNull: false },
+    status: {
+      type: DataTypes.ENUM("active", "expired", "cancelled"),
+      allowNull: false,
+      defaultValue: "active"
+    }
+  },
+  { tableName: "insurance_policies", timestamps: true }
+);
+
+const InsuranceClaim = sequelize.define(
+  "InsuranceClaim",
+  {
+    id: { type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4, primaryKey: true },
+    incidentType: {
+      type: DataTypes.ENUM("drought", "flood", "pest", "disease", "storm", "other"),
+      allowNull: false
+    },
+    description: { type: DataTypes.TEXT, allowNull: false },
+    incidentDate: { type: DataTypes.DATEONLY, allowNull: false },
+    amountRequestedKes: { type: DataTypes.DECIMAL(14, 2), allowNull: false, validate: { min: 100 } },
+    amountApprovedKes: { type: DataTypes.DECIMAL(14, 2), allowNull: true },
+    status: {
+      type: DataTypes.ENUM("submitted", "under_review", "approved", "rejected", "paid"),
+      allowNull: false,
+      defaultValue: "submitted"
+    },
+    assessorNote: { type: DataTypes.TEXT, allowNull: true }
+  },
+  { tableName: "insurance_claims", timestamps: true }
+);
+
 const BillingPlan = sequelize.define(
   "BillingPlan",
   {
@@ -594,6 +636,34 @@ Farm.hasMany(LoanApplication, {
 });
 LoanApplication.belongsTo(Farm, { foreignKey: "farmId" });
 
+User.hasMany(InsurancePolicy, {
+  foreignKey: "userId",
+  as: "insurancePolicies",
+  onDelete: "CASCADE"
+});
+InsurancePolicy.belongsTo(User, { foreignKey: "userId" });
+
+Farm.hasMany(InsurancePolicy, {
+  foreignKey: "farmId",
+  as: "insurancePolicies",
+  onDelete: "CASCADE"
+});
+InsurancePolicy.belongsTo(Farm, { foreignKey: "farmId" });
+
+InsurancePolicy.hasMany(InsuranceClaim, {
+  foreignKey: "policyId",
+  as: "claims",
+  onDelete: "CASCADE"
+});
+InsuranceClaim.belongsTo(InsurancePolicy, { foreignKey: "policyId", as: "policy" });
+
+Farm.hasMany(InsuranceClaim, {
+  foreignKey: "farmId",
+  as: "insuranceClaims",
+  onDelete: "CASCADE"
+});
+InsuranceClaim.belongsTo(Farm, { foreignKey: "farmId" });
+
 Farm.hasMany(CarbonPractice, {
   foreignKey: "farmId",
   as: "carbonPractices",
@@ -673,6 +743,8 @@ module.exports = {
   MarketplaceListing,
   MarketplaceOrder,
   LoanApplication,
+  InsurancePolicy,
+  InsuranceClaim,
   BillingPlan,
   UserSubscription,
   PaymentTransaction,

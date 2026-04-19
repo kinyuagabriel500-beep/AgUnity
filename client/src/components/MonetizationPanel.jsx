@@ -21,6 +21,21 @@ export default function MonetizationPanel({ farmId = "" }) {
     phoneNumber: "",
   });
   const [activePayment, setActivePayment] = useState(null);
+  const [integrationStatus, setIntegrationStatus] = useState(null);
+  const [insuranceQuote, setInsuranceQuote] = useState(null);
+  const [insurancePolicies, setInsurancePolicies] = useState([]);
+  const [insuranceForm, setInsuranceForm] = useState({
+    cropType: "maize",
+    coverAmountKes: 150000,
+    seasonLabel: "long-rains"
+  });
+  const [claimForm, setClaimForm] = useState({
+    policyId: "",
+    incidentType: "drought",
+    incidentDate: new Date().toISOString().slice(0, 10),
+    amountRequestedKes: "",
+    description: ""
+  });
 
   const currency = useMemo(
     () => new Intl.NumberFormat(undefined, { style: "currency", currency: "KES", maximumFractionDigits: 0 }),
@@ -38,6 +53,13 @@ export default function MonetizationPanel({ farmId = "" }) {
       setPlans(plansRes.items || []);
       setSubscription(subRes.item || null);
       setTickets(ticketsRes.items || []);
+
+      const [statusRes, policiesRes] = await Promise.all([
+        getJson("/integrations/status").catch(() => null),
+        getJson("/finance/insurance/policies").catch(() => ({ items: [] }))
+      ]);
+      setIntegrationStatus(statusRes);
+      setInsurancePolicies(policiesRes.items || []);
     } catch (_error) {
       setMessage("Billing service unavailable right now.");
     } finally {
@@ -151,6 +173,88 @@ export default function MonetizationPanel({ farmId = "" }) {
       }
     } catch (_error) {
       setMessage("Unable to verify payment status.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const getInsuranceQuote = async (event) => {
+    event.preventDefault();
+    if (!farmId) {
+      setMessage("Create or select a farm before requesting insurance quote.");
+      return;
+    }
+
+    setBusy(true);
+    setMessage("");
+    try {
+      const query = new URLSearchParams({
+        farmId,
+        coverAmountKes: String(Number(insuranceForm.coverAmountKes || 0)),
+        cropType: insuranceForm.cropType,
+        seasonLabel: insuranceForm.seasonLabel
+      });
+      const response = await getJson(`/finance/insurance/quote?${query.toString()}`);
+      setInsuranceQuote(response.quote || null);
+      setMessage("Insurance quote generated.");
+    } catch (_error) {
+      setMessage("Unable to generate insurance quote.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const createInsurancePolicy = async () => {
+    if (!farmId || !insuranceQuote) {
+      setMessage("Generate a quote first.");
+      return;
+    }
+
+    setBusy(true);
+    setMessage("");
+    try {
+      const response = await postJson("/finance/insurance/policies", {
+        farmId,
+        coverAmountKes: Number(insuranceForm.coverAmountKes || 0),
+        cropType: insuranceForm.cropType,
+        seasonLabel: insuranceForm.seasonLabel
+      });
+      setMessage(`Insurance policy ${response.policy.policyNumber} created.`);
+      await load();
+    } catch (_error) {
+      setMessage("Unable to create insurance policy.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const submitClaim = async (event) => {
+    event.preventDefault();
+    if (!farmId) {
+      setMessage("Create or select a farm before filing claim.");
+      return;
+    }
+
+    setBusy(true);
+    setMessage("");
+    try {
+      await postJson("/finance/insurance/claims", {
+        farmId,
+        policyId: claimForm.policyId,
+        incidentType: claimForm.incidentType,
+        incidentDate: claimForm.incidentDate,
+        amountRequestedKes: Number(claimForm.amountRequestedKes || 0),
+        description: claimForm.description
+      });
+      setMessage("Insurance claim submitted.");
+      setClaimForm((current) => ({
+        ...current,
+        amountRequestedKes: "",
+        description: ""
+      }));
+      await load();
+    } catch (_error) {
+      setMessage("Unable to submit insurance claim.");
     } finally {
       setBusy(false);
     }
@@ -279,6 +383,100 @@ export default function MonetizationPanel({ farmId = "" }) {
           ))}
           {!tickets.length ? <li>No tickets submitted yet.</li> : null}
         </ul>
+      </div>
+
+      <form className="auth-form" onSubmit={getInsuranceQuote}>
+        <h4>Crop Insurance</h4>
+        <input
+          placeholder="Crop type"
+          value={insuranceForm.cropType}
+          onChange={(e) => setInsuranceForm((p) => ({ ...p, cropType: e.target.value }))}
+          required
+        />
+        <input
+          type="number"
+          min="1000"
+          placeholder="Cover amount KES"
+          value={insuranceForm.coverAmountKes}
+          onChange={(e) => setInsuranceForm((p) => ({ ...p, coverAmountKes: e.target.value }))}
+          required
+        />
+        <input
+          placeholder="Season label"
+          value={insuranceForm.seasonLabel}
+          onChange={(e) => setInsuranceForm((p) => ({ ...p, seasonLabel: e.target.value }))}
+          required
+        />
+        <div className="inline-actions">
+          <button type="submit" disabled={busy}>{busy ? "Calculating..." : "Get quote"}</button>
+          <button type="button" disabled={busy || !insuranceQuote} onClick={createInsurancePolicy}>Create policy</button>
+        </div>
+        {insuranceQuote ? (
+          <small>
+            Premium: {currency.format(Number(insuranceQuote.premiumKes || 0))} | Cover: {currency.format(Number(insuranceQuote.coverAmountKes || 0))}
+          </small>
+        ) : null}
+      </form>
+
+      <form className="auth-form" onSubmit={submitClaim}>
+        <h4>Insurance Claim</h4>
+        <select
+          value={claimForm.policyId}
+          onChange={(e) => setClaimForm((p) => ({ ...p, policyId: e.target.value }))}
+          required
+        >
+          <option value="">Select policy</option>
+          {insurancePolicies.map((policy) => (
+            <option key={policy.id} value={policy.id}>{policy.policyNumber} ({policy.status})</option>
+          ))}
+        </select>
+        <select
+          value={claimForm.incidentType}
+          onChange={(e) => setClaimForm((p) => ({ ...p, incidentType: e.target.value }))}
+        >
+          <option value="drought">Drought</option>
+          <option value="flood">Flood</option>
+          <option value="pest">Pest</option>
+          <option value="disease">Disease</option>
+          <option value="storm">Storm</option>
+          <option value="other">Other</option>
+        </select>
+        <input
+          type="date"
+          value={claimForm.incidentDate}
+          onChange={(e) => setClaimForm((p) => ({ ...p, incidentDate: e.target.value }))}
+          required
+        />
+        <input
+          type="number"
+          min="100"
+          placeholder="Amount requested KES"
+          value={claimForm.amountRequestedKes}
+          onChange={(e) => setClaimForm((p) => ({ ...p, amountRequestedKes: e.target.value }))}
+          required
+        />
+        <input
+          placeholder="Claim details"
+          value={claimForm.description}
+          onChange={(e) => setClaimForm((p) => ({ ...p, description: e.target.value }))}
+          required
+        />
+        <button type="submit" disabled={busy}>{busy ? "Submitting..." : "Submit claim"}</button>
+      </form>
+
+      <div>
+        <h4>Integration Readiness</h4>
+        {integrationStatus ? (
+          <ul className="simple-list">
+            <li>AI service: {integrationStatus.aiService?.reachable ? "live" : "offline/degraded"}</li>
+            <li>Media diagnosis: {integrationStatus.mediaDiagnosis?.mode}</li>
+            <li>IPFS mode: {integrationStatus.traceability?.ipfs?.mode}</li>
+            <li>Polygon mode: {integrationStatus.traceability?.polygon?.mode}</li>
+            <li>Payments: {integrationStatus.payments?.mpesaConfigured || integrationStatus.payments?.stripeConfigured ? "configured" : "not configured"}</li>
+          </ul>
+        ) : (
+          <p>Integration status unavailable.</p>
+        )}
       </div>
     </section>
   );

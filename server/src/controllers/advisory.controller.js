@@ -70,6 +70,25 @@ const stripCodeFence = (text) => {
   return trimmed.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/, "").trim();
 };
 
+const ALLOWED_ISSUES = new Set([
+  "disease",
+  "pest",
+  "nutrient-deficiency",
+  "weed",
+  "water-stress",
+  "livestock-issue",
+  "machinery-issue",
+  "unknown"
+]);
+
+const clampConfidence = (value, fallback = 0.45) => {
+  const numeric = Number(value);
+  if (!Number.isFinite(numeric)) return fallback;
+  if (numeric < 0) return 0;
+  if (numeric > 1) return 1;
+  return numeric;
+};
+
 const normalizeMediaAnalysis = (text, fallbackContext) => {
   const fallback = {
     issueType: "unknown",
@@ -94,10 +113,15 @@ const normalizeMediaAnalysis = (text, fallbackContext) => {
 
   try {
     const parsed = JSON.parse(stripCodeFence(text));
+    const parsedIssue = String(parsed.issueType || fallback.issueType).toLowerCase();
+    const issueType = ALLOWED_ISSUES.has(parsedIssue) ? parsedIssue : "unknown";
+    const confidence = clampConfidence(parsed.confidence, fallback.confidence);
+    const downgradedIssueType = confidence < 0.4 ? "unknown" : issueType;
+
     return {
-      issueType: String(parsed.issueType || fallback.issueType),
+      issueType: downgradedIssueType,
       title: String(parsed.title || fallback.title),
-      confidence: Number(parsed.confidence) || fallback.confidence,
+      confidence,
       findings: Array.isArray(parsed.findings) ? parsed.findings.slice(0, 6) : fallback.findings,
       immediateActions: Array.isArray(parsed.immediateActions) ? parsed.immediateActions.slice(0, 6) : fallback.immediateActions,
       followUpPlan: Array.isArray(parsed.followUpPlan) ? parsed.followUpPlan.slice(0, 6) : fallback.followUpPlan,
@@ -379,6 +403,7 @@ const chatWithMediaAdvisor = async (req, res, next) => {
         ],
         advisoryMessage:
           "I can already chat and advise from your farm context. For auto-detection from media, the Gemini API key must be configured on the backend.",
+        diagnosisMode: "fallback",
         context: {
           location: locationLabel,
           crop,
@@ -394,6 +419,8 @@ const chatWithMediaAdvisor = async (req, res, next) => {
       season,
       mediaType: mediaFile.mimetype
     });
+
+    responsePayload.diagnosisMode = "gemini";
 
     return res.json(responsePayload);
   } catch (error) {

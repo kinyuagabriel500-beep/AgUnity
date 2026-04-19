@@ -1,5 +1,5 @@
 const { z } = require("zod");
-const { Farm, Activity, Expense, Harvest } = require("../db/models");
+const { Farm, Plot, Activity, Expense, Harvest } = require("../db/models");
 
 const farmSchema = z.object({
   name: z.string().min(2),
@@ -14,6 +14,7 @@ const farmSchema = z.object({
 
 const activitySchema = z.object({
   farmId: z.string().uuid(),
+  plotId: z.string().uuid().optional().nullable(),
   type: z.enum(["planting", "spraying", "harvesting"]),
   date: z.string(),
   notes: z.string().optional(),
@@ -22,6 +23,7 @@ const activitySchema = z.object({
 
 const expenseSchema = z.object({
   farmId: z.string().uuid(),
+  plotId: z.string().uuid().optional().nullable(),
   category: z.string().min(2),
   amountKes: z.coerce.number().positive(),
   expenseDate: z.string(),
@@ -30,11 +32,23 @@ const expenseSchema = z.object({
 
 const harvestSchema = z.object({
   farmId: z.string().uuid(),
+  plotId: z.string().uuid().optional().nullable(),
   crop: z.string().min(2),
   quantityKg: z.coerce.number().positive(),
   unitPriceKes: z.coerce.number().positive(),
   harvestDate: z.string()
 });
+
+const resolveOwnedPlot = async (plotId, farmId, userId) => {
+  if (!plotId) {
+    return null;
+  }
+
+  return Plot.findOne({
+    where: { id: plotId, farmId },
+    include: [{ model: Farm, where: { userId }, attributes: ["id"], required: true }]
+  });
+};
 
 const createFarm = async (req, res, next) => {
   try {
@@ -87,7 +101,12 @@ const createActivity = async (req, res, next) => {
     const payload = activitySchema.parse(req.body);
     const farm = await Farm.findOne({ where: { id: payload.farmId, userId: req.user.id } });
     if (!farm) return res.status(404).json({ message: "Farm not found" });
-    const activity = await Activity.create(payload);
+    const plot = await resolveOwnedPlot(payload.plotId, farm.id, req.user.id);
+    if (payload.plotId && !plot) return res.status(404).json({ message: "Plot not found" });
+    const activity = await Activity.create({
+      ...payload,
+      plotId: plot?.id || null
+    });
     res.status(201).json(activity);
   } catch (error) {
     next(error);
@@ -99,7 +118,12 @@ const createExpense = async (req, res, next) => {
     const payload = expenseSchema.parse(req.body);
     const farm = await Farm.findOne({ where: { id: payload.farmId, userId: req.user.id } });
     if (!farm) return res.status(404).json({ message: "Farm not found" });
-    const expense = await Expense.create(payload);
+    const plot = await resolveOwnedPlot(payload.plotId, farm.id, req.user.id);
+    if (payload.plotId && !plot) return res.status(404).json({ message: "Plot not found" });
+    const expense = await Expense.create({
+      ...payload,
+      plotId: plot?.id || null
+    });
     res.status(201).json(expense);
   } catch (error) {
     next(error);
@@ -111,7 +135,12 @@ const createHarvest = async (req, res, next) => {
     const payload = harvestSchema.parse(req.body);
     const farm = await Farm.findOne({ where: { id: payload.farmId, userId: req.user.id } });
     if (!farm) return res.status(404).json({ message: "Farm not found" });
-    const harvest = await Harvest.create(payload);
+    const plot = await resolveOwnedPlot(payload.plotId, farm.id, req.user.id);
+    if (payload.plotId && !plot) return res.status(404).json({ message: "Plot not found" });
+    const harvest = await Harvest.create({
+      ...payload,
+      plotId: plot?.id || null
+    });
     res.status(201).json(harvest);
   } catch (error) {
     next(error);

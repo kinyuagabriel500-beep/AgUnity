@@ -6,6 +6,7 @@ const marketplaceRoutes = require("./marketplace.routes");
 const financeRoutes = require("./finance.routes");
 const carbonRoutes = require("./carbon.routes");
 const traceabilityRoutes = require("./traceability.routes");
+const plotRoutes = require("./plot.routes");
 const farmScoreRoutes = require("./farm-score.routes");
 const onboardingRoutes = require("./onboarding.routes");
 const advisoryRoutes = require("./advisory.routes");
@@ -13,6 +14,7 @@ const adminRoutes = require("./admin.routes");
 const enterpriseRoutes = require("./enterprise.routes");
 const billingRoutes = require("./billing.routes");
 const paymentRoutes = require("./payment.routes");
+const integrationRoutes = require("./integration.routes");
 
 const router = Router();
 
@@ -23,6 +25,7 @@ router.use("/", marketplaceRoutes);
 router.use("/", financeRoutes);
 router.use("/", carbonRoutes);
 router.use("/", traceabilityRoutes);
+router.use("/", plotRoutes);
 router.use("/", farmScoreRoutes);
 router.use("/", onboardingRoutes);
 router.use("/", advisoryRoutes);
@@ -30,5 +33,6 @@ router.use("/", adminRoutes);
 router.use("/", enterpriseRoutes);
 router.use("/", billingRoutes);
 router.use("/", paymentRoutes);
+router.use("/", integrationRoutes);
 
 module.exports = router;

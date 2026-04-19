@@ -74,6 +74,16 @@ export const patchJson = async (path, body) => {
   return response.json();
 };
 
+export const deleteJson = async (path) => {
+  const response = await fetch(`${API_BASE_URL}${path}`, {
+    method: "DELETE",
+    headers: withAuth()
+  });
+  if (!response.ok && response.status !== 204) throw new Error(await parseErrorMessage(response));
+  if (response.status === 204) return null;
+  return response.json();
+};
+
 export const login = async (email, password, role) => {
   const data = await postJson("/auth/login", {
     email,

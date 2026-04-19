@@ -5,7 +5,7 @@ import NetworkBadge from "../components/NetworkBadge";
 import FarmerChatPanel from "../components/FarmerChatPanel";
 import EnterpriseManagerPanel from "../components/EnterpriseManagerPanel";
 import MonetizationPanel from "../components/MonetizationPanel";
-import { getJson, postJson } from "../api/client";
+import { deleteJson, getJson, patchJson, postJson } from "../api/client";
 
 const REFRESH_INTERVAL_MS = 90 * 1000;
 const STEP_TITLES = [
@@ -63,6 +63,7 @@ export default function FarmerDashboard() {
     online: true,
     farmId: "",
     activities: [],
+    plots: [],
     alerts: [],
     profit: 0,
     score: 0,
@@ -70,9 +71,42 @@ export default function FarmerDashboard() {
     needsOnboarding: false
   });
   const [savingOnboarding, setSavingOnboarding] = useState(false);
+  const [savingPlot, setSavingPlot] = useState(false);
+  const [plotMessage, setPlotMessage] = useState("");
   const [locationStatus, setLocationStatus] = useState("Location not detected yet.");
   const [detectingLocation, setDetectingLocation] = useState(false);
   const [autoDetectAttempted, setAutoDetectAttempted] = useState(false);
+  const [plotForm, setPlotForm] = useState({
+    name: "",
+    crop: "",
+    season: "",
+    areaHectares: "",
+    soilType: ""
+  });
+  const [recordMessage, setRecordMessage] = useState("");
+  const [savingRecord, setSavingRecord] = useState(false);
+  const [activityForm, setActivityForm] = useState({
+    type: "planting",
+    date: new Date().toISOString().slice(0, 10),
+    notes: "",
+    costKes: "0",
+    plotId: ""
+  });
+  const [expenseForm, setExpenseForm] = useState({
+    category: "",
+    amountKes: "",
+    expenseDate: new Date().toISOString().slice(0, 10),
+    notes: "",
+    plotId: ""
+  });
+  const [harvestForm, setHarvestForm] = useState({
+    crop: "",
+    quantityKg: "",
+    unitPriceKes: "",
+    harvestDate: new Date().toISOString().slice(0, 10),
+    plotId: ""
+  });
+  const [editingPlotId, setEditingPlotId] = useState("");
   const [onboarding, setOnboarding] = useState({
     name: "",
     location: "",
@@ -106,6 +140,23 @@ export default function FarmerDashboard() {
     }
   }, []);
 
+  const loadPlots = useCallback(async (farmId) => {
+    if (!farmId) {
+      setState((current) => ({ ...current, plots: [] }));
+      return;
+    }
+
+    try {
+      const plotsResponse = await getJson(`/plots?farmId=${farmId}`);
+      setState((current) => ({
+        ...current,
+        plots: plotsResponse.items || []
+      }));
+    } catch (_error) {
+      setState((current) => ({ ...current, plots: [] }));
+    }
+  }, []);
+
   const loadDashboard = useCallback(async () => {
     try {
       const farms = await getJson("/farms");
@@ -117,6 +168,7 @@ export default function FarmerDashboard() {
           online: true,
           farmId: "",
           activities: [],
+          plots: [],
           alerts: dedupeAlerts(advisory.items || []),
           profit: 0,
           score: 0,
@@ -126,12 +178,13 @@ export default function FarmerDashboard() {
         return;
       }
 
-      const [profit, score, carbon, activities, alerts] = await Promise.all([
+      const [profit, score, carbon, activities, alerts, plots] = await Promise.all([
         getJson(`/farm-profit?farmId=${farmId}`),
         getJson(`/farm-score?farmId=${farmId}`),
         getJson(`/carbon/summary?farmId=${farmId}`),
         getJson(`/activities?farmId=${farmId}`),
-        getJson(`/advisory/alerts?farmId=${farmId}`)
+        getJson(`/advisory/alerts?farmId=${farmId}`),
+        getJson(`/plots?farmId=${farmId}`)
       ]);
 
       setState({
@@ -144,6 +197,7 @@ export default function FarmerDashboard() {
           label: a.type,
           value: `${a.date}${a.notes ? ` - ${a.notes}` : ""}`
         })),
+        plots: plots.items || [],
         alerts: dedupeAlerts(alerts.items || []),
         profit: Number(profit.totals?.profit || 0),
         score: Number(score.scores?.overall || 0),
@@ -343,6 +397,173 @@ export default function FarmerDashboard() {
       await loadDashboard();
     } finally {
       setSavingOnboarding(false);
+    }
+  };
+
+  const resetPlotForm = () => {
+    setPlotForm({
+      name: "",
+      crop: "",
+      season: "",
+      areaHectares: "",
+      soilType: ""
+    });
+    setEditingPlotId("");
+  };
+
+  const beginPlotEdit = (plot) => {
+    setEditingPlotId(plot.id);
+    setPlotForm({
+      name: plot.name || "",
+      crop: plot.crop || "",
+      season: plot.season || "",
+      areaHectares: String(plot.areaHectares || ""),
+      soilType: plot.soilType || ""
+    });
+    setPlotMessage("");
+  };
+
+  const submitPlot = async (event) => {
+    event.preventDefault();
+    if (!state.farmId) return;
+
+    setSavingPlot(true);
+    setPlotMessage("");
+
+    try {
+      const payload = {
+        farmId: state.farmId,
+        name: plotForm.name.trim(),
+        crop: plotForm.crop.trim() || undefined,
+        season: plotForm.season.trim() || undefined,
+        areaHectares: Number(plotForm.areaHectares),
+        soilType: plotForm.soilType.trim() || undefined
+      };
+
+      if (editingPlotId) {
+        await patchJson(`/plots/${editingPlotId}`, payload);
+        setPlotMessage("Plot updated.");
+      } else {
+        await postJson("/plots", payload);
+        setPlotMessage("Plot added.");
+      }
+
+      await loadDashboard();
+      resetPlotForm();
+    } catch (error) {
+      setPlotMessage(error.message || "Unable to save plot right now.");
+    } finally {
+      setSavingPlot(false);
+    }
+  };
+
+  const removePlot = async (plotId) => {
+    if (!window.confirm("Delete this plot? Activities and harvests linked to it will stay unassigned.")) {
+      return;
+    }
+
+    setSavingPlot(true);
+    setPlotMessage("");
+    try {
+      await deleteJson(`/plots/${plotId}`);
+      await loadDashboard();
+      if (editingPlotId === plotId) {
+        resetPlotForm();
+      }
+      setPlotMessage("Plot deleted.");
+    } catch (error) {
+      setPlotMessage(error.message || "Unable to delete plot right now.");
+    } finally {
+      setSavingPlot(false);
+    }
+  };
+
+  const submitActivityRecord = async (event) => {
+    event.preventDefault();
+    if (!state.farmId) return;
+
+    setSavingRecord(true);
+    setRecordMessage("");
+    try {
+      await postJson("/activities", {
+        farmId: state.farmId,
+        plotId: activityForm.plotId || undefined,
+        type: activityForm.type,
+        date: activityForm.date,
+        notes: activityForm.notes || undefined,
+        costKes: Number(activityForm.costKes || 0)
+      });
+      setActivityForm((current) => ({
+        ...current,
+        notes: "",
+        costKes: "0"
+      }));
+      setRecordMessage("Activity logged.");
+      await loadDashboard();
+    } catch (error) {
+      setRecordMessage(error.message || "Unable to log activity right now.");
+    } finally {
+      setSavingRecord(false);
+    }
+  };
+
+  const submitExpenseRecord = async (event) => {
+    event.preventDefault();
+    if (!state.farmId) return;
+
+    setSavingRecord(true);
+    setRecordMessage("");
+    try {
+      await postJson("/expenses", {
+        farmId: state.farmId,
+        plotId: expenseForm.plotId || undefined,
+        category: expenseForm.category,
+        amountKes: Number(expenseForm.amountKes),
+        expenseDate: expenseForm.expenseDate,
+        notes: expenseForm.notes || undefined
+      });
+      setExpenseForm((current) => ({
+        ...current,
+        category: "",
+        amountKes: "",
+        notes: ""
+      }));
+      setRecordMessage("Expense logged.");
+      await loadDashboard();
+    } catch (error) {
+      setRecordMessage(error.message || "Unable to log expense right now.");
+    } finally {
+      setSavingRecord(false);
+    }
+  };
+
+  const submitHarvestRecord = async (event) => {
+    event.preventDefault();
+    if (!state.farmId) return;
+
+    setSavingRecord(true);
+    setRecordMessage("");
+    try {
+      await postJson("/harvests", {
+        farmId: state.farmId,
+        plotId: harvestForm.plotId || undefined,
+        crop: harvestForm.crop,
+        quantityKg: Number(harvestForm.quantityKg),
+        unitPriceKes: Number(harvestForm.unitPriceKes),
+        harvestDate: harvestForm.harvestDate
+      });
+      setHarvestForm((current) => ({
+        ...current,
+        crop: "",
+        quantityKg: "",
+        unitPriceKes: ""
+      }));
+      setRecordMessage("Harvest logged.");
+      await loadDashboard();
+    } catch (error) {
+      setRecordMessage(error.message || "Unable to log harvest right now.");
+    } finally {
+      setSavingRecord(false);
     }
   };
 
@@ -591,6 +812,224 @@ export default function FarmerDashboard() {
             : <li>No alerts yet. New advisories appear as data arrives.</li>}
         </ul>
       </section>
+
+      {!state.needsOnboarding ? (
+        <section>
+          <div className="row">
+            <h3>Plots</h3>
+            <button type="button" onClick={() => loadPlots(state.farmId)} disabled={savingPlot}>
+              Refresh plots
+            </button>
+          </div>
+          <p>Manage each field block separately so advisory, traceability, and harvest records stay crop-specific.</p>
+
+          <form className="auth-form" onSubmit={submitPlot}>
+            <input
+              placeholder="Plot name"
+              value={plotForm.name}
+              onChange={(e) => setPlotForm((current) => ({ ...current, name: e.target.value }))}
+              required
+            />
+            <input
+              placeholder="Crop"
+              value={plotForm.crop}
+              onChange={(e) => setPlotForm((current) => ({ ...current, crop: e.target.value }))}
+            />
+            <input
+              placeholder="Season"
+              value={plotForm.season}
+              onChange={(e) => setPlotForm((current) => ({ ...current, season: e.target.value }))}
+            />
+            <input
+              placeholder="Area in hectares"
+              value={plotForm.areaHectares}
+              onChange={(e) => setPlotForm((current) => ({ ...current, areaHectares: e.target.value }))}
+              required
+            />
+            <input
+              placeholder="Soil type"
+              value={plotForm.soilType}
+              onChange={(e) => setPlotForm((current) => ({ ...current, soilType: e.target.value }))}
+            />
+            <div className="wizard-actions">
+              <button type="submit" disabled={savingPlot}>
+                {savingPlot ? (editingPlotId ? "Updating..." : "Saving...") : editingPlotId ? "Update plot" : "Add plot"}
+              </button>
+              {editingPlotId ? (
+                <button type="button" className="link-btn" onClick={resetPlotForm} disabled={savingPlot}>
+                  Cancel edit
+                </button>
+              ) : null}
+            </div>
+          </form>
+
+          {plotMessage ? <p>{plotMessage}</p> : null}
+
+          <div className="table-wrap">
+            <table className="table">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Crop</th>
+                  <th>Season</th>
+                  <th>Area</th>
+                  <th>Soil</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {state.plots.length ? state.plots.map((plot) => (
+                  <tr key={plot.id}>
+                    <td>{plot.name}</td>
+                    <td>{plot.crop || "-"}</td>
+                    <td>{plot.season || "-"}</td>
+                    <td>{Number(plot.areaHectares || 0).toLocaleString()} ha</td>
+                    <td>{plot.soilType || "-"}</td>
+                    <td>
+                      <div className="wizard-actions">
+                        <button type="button" onClick={() => beginPlotEdit(plot)} disabled={savingPlot}>
+                          Edit
+                        </button>
+                        <button type="button" className="link-btn" onClick={() => removePlot(plot.id)} disabled={savingPlot}>
+                          Delete
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                )) : (
+                  <tr>
+                    <td colSpan={6}>No plots yet. Add your first block of land above.</td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      ) : null}
+
+      {!state.needsOnboarding ? (
+        <section>
+          <h3>Farm Records</h3>
+          <p>Log activities, expenses, and harvests with optional plot selection for better analytics and traceability.</p>
+
+          <div className="grid-3">
+            <form className="auth-form" onSubmit={submitActivityRecord}>
+              <h4>Log Activity</h4>
+              <select
+                value={activityForm.plotId}
+                onChange={(e) => setActivityForm((current) => ({ ...current, plotId: e.target.value }))}
+              >
+                <option value="">All farm plots</option>
+                {state.plots.map((plot) => (
+                  <option key={plot.id} value={plot.id}>{plot.name}</option>
+                ))}
+              </select>
+              <select
+                value={activityForm.type}
+                onChange={(e) => setActivityForm((current) => ({ ...current, type: e.target.value }))}
+              >
+                <option value="planting">Planting</option>
+                <option value="spraying">Spraying</option>
+                <option value="harvesting">Harvesting</option>
+              </select>
+              <input
+                type="date"
+                value={activityForm.date}
+                onChange={(e) => setActivityForm((current) => ({ ...current, date: e.target.value }))}
+                required
+              />
+              <input
+                placeholder="Cost KES"
+                value={activityForm.costKes}
+                onChange={(e) => setActivityForm((current) => ({ ...current, costKes: e.target.value }))}
+              />
+              <input
+                placeholder="Notes"
+                value={activityForm.notes}
+                onChange={(e) => setActivityForm((current) => ({ ...current, notes: e.target.value }))}
+              />
+              <button type="submit" disabled={savingRecord}>{savingRecord ? "Saving..." : "Save activity"}</button>
+            </form>
+
+            <form className="auth-form" onSubmit={submitExpenseRecord}>
+              <h4>Log Expense</h4>
+              <select
+                value={expenseForm.plotId}
+                onChange={(e) => setExpenseForm((current) => ({ ...current, plotId: e.target.value }))}
+              >
+                <option value="">All farm plots</option>
+                {state.plots.map((plot) => (
+                  <option key={plot.id} value={plot.id}>{plot.name}</option>
+                ))}
+              </select>
+              <input
+                placeholder="Category"
+                value={expenseForm.category}
+                onChange={(e) => setExpenseForm((current) => ({ ...current, category: e.target.value }))}
+                required
+              />
+              <input
+                placeholder="Amount KES"
+                value={expenseForm.amountKes}
+                onChange={(e) => setExpenseForm((current) => ({ ...current, amountKes: e.target.value }))}
+                required
+              />
+              <input
+                type="date"
+                value={expenseForm.expenseDate}
+                onChange={(e) => setExpenseForm((current) => ({ ...current, expenseDate: e.target.value }))}
+                required
+              />
+              <input
+                placeholder="Notes"
+                value={expenseForm.notes}
+                onChange={(e) => setExpenseForm((current) => ({ ...current, notes: e.target.value }))}
+              />
+              <button type="submit" disabled={savingRecord}>{savingRecord ? "Saving..." : "Save expense"}</button>
+            </form>
+
+            <form className="auth-form" onSubmit={submitHarvestRecord}>
+              <h4>Log Harvest</h4>
+              <select
+                value={harvestForm.plotId}
+                onChange={(e) => setHarvestForm((current) => ({ ...current, plotId: e.target.value }))}
+              >
+                <option value="">All farm plots</option>
+                {state.plots.map((plot) => (
+                  <option key={plot.id} value={plot.id}>{plot.name}</option>
+                ))}
+              </select>
+              <input
+                placeholder="Crop"
+                value={harvestForm.crop}
+                onChange={(e) => setHarvestForm((current) => ({ ...current, crop: e.target.value }))}
+                required
+              />
+              <input
+                placeholder="Quantity Kg"
+                value={harvestForm.quantityKg}
+                onChange={(e) => setHarvestForm((current) => ({ ...current, quantityKg: e.target.value }))}
+                required
+              />
+              <input
+                placeholder="Unit price KES"
+                value={harvestForm.unitPriceKes}
+                onChange={(e) => setHarvestForm((current) => ({ ...current, unitPriceKes: e.target.value }))}
+                required
+              />
+              <input
+                type="date"
+                value={harvestForm.harvestDate}
+                onChange={(e) => setHarvestForm((current) => ({ ...current, harvestDate: e.target.value }))}
+                required
+              />
+              <button type="submit" disabled={savingRecord}>{savingRecord ? "Saving..." : "Save harvest"}</button>
+            </form>
+          </div>
+
+          {recordMessage ? <p>{recordMessage}</p> : null}
+        </section>
+      ) : null}
 
       <FarmerChatPanel farmId={state.farmId} />
 

@@ -4,7 +4,7 @@ import * as Notifications from "expo-notifications";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import StatusPill from "./src/components/StatusPill";
 import { login, sendActivity, setAuthToken } from "./src/services/api";
-import { addToQueue, clearQueue, pullQueue } from "./src/storage/offlineQueue";
+import { addToQueue, countQueue, markFailed, markSynced, pullQueue } from "./src/storage/offlineQueue";
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({ shouldShowAlert: true, shouldPlaySound: false, shouldSetBadge: false })
@@ -14,7 +14,7 @@ export default function App() {
   const [online, setOnline] = useState(false);
   const [queued, setQueued] = useState(0);
   const [session, setSession] = useState({ token: "", email: "", password: "" });
-  const [activity, setActivity] = useState({ type: "planting", notes: "", farmId: "", date: "2026-04-13", costKes: "0" });
+  const [activity, setActivity] = useState({ type: "planting", notes: "", farmId: "", plotId: "", date: "2026-04-13", costKes: "0" });
 
   useEffect(() => {
     Notifications.requestPermissionsAsync();
@@ -24,6 +24,8 @@ export default function App() {
         setAuthToken(saved);
         setSession((p) => ({ ...p, token: saved }));
       }
+      const queuedCount = await countQueue();
+      setQueued(queuedCount);
     })();
   }, []);
   const signIn = async () => {
@@ -56,14 +58,31 @@ export default function App() {
   };
 
   const syncQueue = async () => {
+    let synced = 0;
+    let failed = 0;
     try {
       const items = await pullQueue();
-      for (const item of items) await sendActivity(item);
-      await clearQueue();
-      setQueued(0);
+      for (const entry of items) {
+        try {
+          await sendActivity(entry.payload || entry);
+          await markSynced(entry.id);
+          synced += 1;
+        } catch (error) {
+          await markFailed(entry.id, error?.message);
+          failed += 1;
+        }
+      }
+
+      const queuedCount = await countQueue();
+      setQueued(queuedCount);
       setOnline(true);
-      await notify("Offline records synced successfully.");
-    } catch (_e) {
+      await notify(`Sync complete. Synced ${synced}, pending ${queuedCount}.`);
+      if (failed > 0) {
+        Alert.alert("Partial Sync", `Synced ${synced}. ${failed} entries kept for retry.`);
+      } else {
+        Alert.alert("Sync Complete", `Synced ${synced} records.`);
+      }
+    } catch (_error) {
       setOnline(false);
       Alert.alert("Sync Failed", "Still offline or server unavailable.");
     }
@@ -86,6 +105,8 @@ export default function App() {
         <View style={styles.card}>
           <Text style={styles.label}>Farm ID</Text>
           <TextInput style={styles.input} value={activity.farmId} onChangeText={(v) => setActivity((p) => ({ ...p, farmId: v }))} />
+          <Text style={styles.label}>Plot ID (optional)</Text>
+          <TextInput style={styles.input} value={activity.plotId} onChangeText={(v) => setActivity((p) => ({ ...p, plotId: v }))} />
           <Text style={styles.label}>Activity Type</Text>
           <TextInput style={styles.input} value={activity.type} onChangeText={(v) => setActivity((p) => ({ ...p, type: v }))} />
           <Text style={styles.label}>Notes</Text>
